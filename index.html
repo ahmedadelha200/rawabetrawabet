@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="حافظة الروابط">
+<meta name="theme-color" content="#1A1B2E">
+<meta name="description" content="تطبيق حافظة الروابط - لإدارة وحفظ الروابط ومشاركتها">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>حافظة الروابط</title>
+<style>
+/* ===== CSS Custom Properties ===== */
+:root {
+  --bg: #0F1018;
+  --surface: #1A1B2E;
+  --surface-high: #252742;
+  --surface-highest: #2F3154;
+  --primary: #B8A5FF;
+  --primary-dim: #9580E6;
+  --primary-container: #4F378B;
+  --on-primary: #FFFFFF;
+  --on-surface: #E6E1E9;
+  --on-surface-dim: #C9C4D0;
+  --on-surface-faint: #8E8A95;
+  --outline: #49454F;
+  --outline-dim: #322F38;
+  --error: #F2B8B5;
+  --error-container: #8C1D18;
+  --success: #A5D6A7;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Arabic", "Segoe UI", Tahoma, "Noto Sans Arabic", sans-serif;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 28px;
+  --shadow: 0 2px 8px rgba(0,0,0,0.4);
+  --shadow-high: 0 8px 24px rgba(0,0,0,0.5);
+}
+
+/* ===== Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  height: 100%; width: 100%;
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.6;
+  background: var(--bg);
+  color: var(--on-surface);
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+  overflow: hidden;
+  touch-action: manipulation;
+}
+
+/* ===== App Shell ===== */
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+}
+
+/* ===== Header ===== */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--outline-dim);
+  min-height: 56px;
+  flex-shrink: 0;
+  z-index: 10;
+}
+.header-title {
+  flex: 1;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--on-surface);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.header-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: none;
+  background: transparent;
+  color: var(--primary);
+  font-size: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+.header-btn:hover, .header-btn:focus-visible {
+  background: rgba(184, 165, 255, 0.12);
+}
+.header-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.header-btn[hidden] { display: none; }
+
+/* ===== Main Content ===== */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px;
+  padding-bottom: 100px;
+}
+
+/* ===== Cards ===== */
+.card-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.card {
+  display: flex;
+  align-items: center;
+  background: var(--surface-high);
+  border: 1px solid var(--outline-dim);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  min-height: 56px;
+  box-shadow: var(--shadow);
+  transition: transform 0.15s, box-shadow 0.15s;
+  cursor: pointer;
+}
+.card:active {
+  transform: scale(0.98);
+}
+.card-title {
+  flex: 1;
+  padding: 12px 14px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--on-surface);
+  word-break: break-word;
+}
+.card-subtitle {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--on-surface-faint);
+  margin-top: 2px;
+  direction: ltr;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 250px;
+}
+.card-actions-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border: 1px solid var(--outline);
+  background: transparent;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-height: 40px;
+  transition: background 0.2s;
+}
+.card-actions-btn:hover, .card-actions-btn:focus-visible {
+  background: rgba(184, 165, 255, 0.12);
+}
+.card-actions-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ===== Link count badge ===== */
+.card-badge {
+  display: inline-block;
+  background: var(--primary-container);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-top: 4px;
+}
+
+/* ===== Empty State ===== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--on-surface-faint);
+}
+.empty-state-icon {
+  font-size: 56px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+.empty-state-text {
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+/* ===== Bottom Action Bar ===== */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 16px;
+  padding-bottom: calc(12px + var(--safe-bottom));
+  background: var(--surface);
+  border-top: 1px solid var(--outline-dim);
+  z-index: 10;
+}
+.btn-primary {
+  display: block;
+  width: 100%;
+  padding: 14px 24px;
+  border: none;
+  background: var(--primary-container);
+  color: var(--primary);
+  font-size: 16px;
+  font-weight: 700;
+  font-family: var(--font);
+  border-radius: var(--radius-xl);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  min-height: 50px;
+}
+.btn-primary:hover {
+  background: #5E3FA3;
+}
+.btn-primary:active {
+  transform: scale(0.97);
+}
+.btn-primary:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ===== Overlay (shared by dialog, action sheet) ===== */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s, visibility 0.25s;
+}
+.overlay.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ===== Dialog ===== */
+.dialog {
+  background: var(--surface-high);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  width: 100%;
+  max-width: 500px;
+  max-height: 85vh;
+  padding: 24px 20px;
+  padding-bottom: calc(24px + var(--safe-bottom));
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  overflow-y: auto;
+}
+.overlay.visible .dialog {
+  transform: translateY(0);
+}
+.dialog-handle {
+  width: 36px;
+  height: 4px;
+  background: var(--outline);
+  border-radius: 2px;
+  margin: 0 auto 20px;
+}
+.dialog-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--on-surface);
+  margin-bottom: 20px;
+}
+.dialog-message {
+  font-size: 15px;
+  color: var(--on-surface-dim);
+  margin-bottom: 24px;
+  line-height: 1.8;
+}
+.dialog-input-group {
+  margin-bottom: 16px;
+}
+.dialog-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--on-surface-dim);
+  margin-bottom: 8px;
+}
+.dialog-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--outline);
+  background: var(--surface);
+  color: var(--on-surface);
+  font-size: 16px;
+  font-family: var(--font);
+  border-radius: var(--radius-sm);
+  direction: auto;
+  transition: border-color 0.2s;
+}
+.dialog-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(184, 165, 255, 0.2);
+}
+.dialog-input::placeholder {
+  color: var(--on-surface-faint);
+}
+.dialog-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+}
+.dialog-btn {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font);
+  border-radius: var(--radius-xl);
+  cursor: pointer;
+  min-height: 48px;
+  transition: background 0.2s;
+}
+.dialog-btn-confirm {
+  background: var(--primary-container);
+  color: var(--primary);
+}
+.dialog-btn-confirm:hover { background: #5E3FA3; }
+.dialog-btn-cancel {
+  background: var(--surface);
+  color: var(--on-surface-dim);
+  border: 1px solid var(--outline);
+}
+.dialog-btn-cancel:hover { background: var(--surface-highest); }
+.dialog-btn-danger {
+  background: var(--error-container);
+  color: var(--error);
+}
+.dialog-btn-danger:hover { background: #A02420; }
+.dialog-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ===== Action Sheet ===== */
+.action-sheet {
+  background: var(--surface-high);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  width: 100%;
+  max-width: 500px;
+  max-height: 80vh;
+  padding: 8px 0;
+  padding-bottom: calc(8px + var(--safe-bottom));
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  overflow-y: auto;
+}
+.overlay.visible .action-sheet {
+  transform: translateY(0);
+}
+.action-sheet-handle {
+  width: 36px;
+  height: 4px;
+  background: var(--outline);
+  border-radius: 2px;
+  margin: 8px auto 12px;
+}
+.action-sheet-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--on-surface-dim);
+  padding: 8px 20px 12px;
+  border-bottom: 1px solid var(--outline-dim);
+}
+.action-sheet-item {
+  display: block;
+  width: 100%;
+  padding: 16px 20px;
+  border: none;
+  background: transparent;
+  color: var(--on-surface);
+  font-size: 16px;
+  font-family: var(--font);
+  text-align: right;
+  cursor: pointer;
+  transition: background 0.15s;
+  min-height: 52px;
+}
+.action-sheet-item:hover, .action-sheet-item:focus-visible {
+  background: rgba(184, 165, 255, 0.08);
+}
+.action-sheet-item:focus-visible {
+  outline: 2px solid var(--primary) inset;
+}
+.action-sheet-item.danger {
+  color: var(--error);
+}
+.action-sheet-divider {
+  height: 1px;
+  background: var(--outline-dim);
+  margin: 4px 0;
+}
+.action-sheet-cancel {
+  display: block;
+  width: calc(100% - 16px);
+  margin: 8px auto 0;
+  padding: 14px 20px;
+  border: none;
+  background: var(--surface);
+  color: var(--on-surface-dim);
+  font-size: 16px;
+  font-weight: 600;
+  font-family: var(--font);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  min-height: 50px;
+}
+
+/* ===== Toast ===== */
+.toast {
+  position: fixed;
+  bottom: calc(80px + var(--safe-bottom));
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--surface-highest);
+  color: var(--on-surface);
+  padding: 12px 24px;
+  border-radius: var(--radius-xl);
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: var(--shadow-high);
+  z-index: 200;
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s;
+  pointer-events: none;
+  white-space: nowrap;
+  border: 1px solid var(--outline-dim);
+}
+.toast.visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* ===== Settings list ===== */
+.settings-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--surface-high);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--outline-dim);
+}
+.settings-item {
+  display: block;
+  width: 100%;
+  padding: 16px 18px;
+  border: none;
+  background: transparent;
+  color: var(--on-surface);
+  font-size: 16px;
+  font-family: var(--font);
+  text-align: right;
+  cursor: pointer;
+  transition: background 0.15s;
+  min-height: 52px;
+}
+.settings-item:hover, .settings-item:focus-visible {
+  background: rgba(184, 165, 255, 0.08);
+}
+.settings-item:focus-visible {
+  outline: 2px solid var(--primary) inset;
+}
+.settings-item + .settings-item {
+  border-top: 1px solid var(--outline-dim);
+}
+.settings-item.danger { color: var(--error); }
+
+/* ===== About section ===== */
+.about-content {
+  background: var(--surface-high);
+  border: 1px solid var(--outline-dim);
+  border-radius: var(--radius-md);
+  padding: 24px 20px;
+}
+.about-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 16px;
+}
+.about-text {
+  font-size: 15px;
+  line-height: 2;
+  color: var(--on-surface-dim);
+}
+.about-version {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--outline-dim);
+  font-size: 13px;
+  color: var(--on-surface-faint);
+  text-align: center;
+}
+
+/* ===== Screen Reader Only ===== */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ===== Focus styles for keyboard/screen reader ===== */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ===== Reduced motion ===== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ===== View transitions ===== */
+.view { display: none; }
+.view.active { display: block; }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- ===== Screen reader live region ===== -->
+  <div id="sr-announce" role="status" aria-live="polite" class="sr-only"></div>
+
+  <!-- ===== Header ===== -->
+  <header class="header" role="banner">
+    <button id="btn-back" class="header-btn" aria-label="رجوع" hidden>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-12"/><path d="M9 6l6 12"/></svg>
+    </button>
+    <h1 id="header-title" class="header-title">حافظة الروابط</h1>
+    <button id="btn-menu" class="header-btn" aria-label="المزيد والإعدادات">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+    </button>
+  </header>
+
+  <!-- ===== Content ===== -->
+  <main class="content" id="main-content" role="main">
+
+    <!-- Portfolios View -->
+    <section id="view-portfolios" class="view active" aria-label="قائمة الحافظات">
+      <div id="portfolios-container"></div>
+    </section>
+
+    <!-- Links View -->
+    <section id="view-links" class="view" aria-label="روابط الحافظة">
+      <div id="links-container"></div>
+    </section>
+
+    <!-- Settings View -->
+    <section id="view-settings" class="view" aria-label="الإعدادات">
+      <ul class="settings-list" role="list">
+        <li><button class="settings-item" id="btn-about" role="listitem">حول تطبيق حافظة الروابط</button></li>
+        <li><button class="settings-item danger" id="btn-clear-all" role="listitem">مسح كل البيانات</button></li>
+      </ul>
+    </section>
+
+    <!-- About View -->
+    <section id="view-about" class="view" aria-label="حول التطبيق">
+      <div class="about-content">
+        <h2 class="about-title">حافظة الروابط</h2>
+        <p class="about-text">
+          تطبيق أندرويد وويب أصلي (100% Native) لإدارة وحفظ الروابط ومشاركتها بسهولة.
+          <br>
+          متوافق تماماً مع قارئات الشاشة TalkBack وVoiceOver والمكبرات البصرية.
+          <br><br>
+          يُتيح لك التطبيق تنظيم روابطك في حافظات (مجلدات) مختلفة، وإضافة وتعديل وحذف الروابط، ونسخها ومشاركتها بسهولة.
+        </p>
+        <div class="about-version">الإصدار 1.0 - نسخة الويب</div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== Bottom Action Bar ===== -->
+  <div class="bottom-bar" id="bottom-bar">
+    <button class="btn-primary" id="btn-bottom-action">إضافة حافظة جديدة</button>
+  </div>
+</div>
+
+<!-- ===== Overlay (Dialog / Action Sheet) ===== -->
+<div id="overlay" class="overlay" role="presentation">
+  <!-- Dialog -->
+  <div id="dialog" class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" hidden>
+    <div class="dialog-handle" aria-hidden="true"></div>
+    <h2 id="dialog-title" class="dialog-title"></h2>
+    <p id="dialog-message" class="dialog-message" hidden></p>
+    <div id="dialog-inputs"></div>
+    <div class="dialog-buttons" id="dialog-buttons"></div>
+  </div>
+  <!-- Action Sheet -->
+  <div id="action-sheet" class="action-sheet" role="dialog" aria-modal="true" aria-label="الإجراءات" hidden>
+    <div class="action-sheet-handle" aria-hidden="true"></div>
+    <div id="action-sheet-title" class="action-sheet-title" hidden></div>
+    <div id="action-sheet-items"></div>
+    <button class="action-sheet-cancel" id="action-sheet-cancel">إلغاء</button>
+  </div>
+</div>
+
+<!-- ===== Toast ===== -->
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ================================================================
+   Data Manager - handles all CRUD operations and localStorage
+   ================================================================ */
+class DataManager {
+  constructor() {
+    this.PORTFOLIOS_KEY = 'hafiza_portfolios';
+    this.LINKS_KEY = 'hafiza_links';
+    this.load();
+  }
+
+  load() {
+    try {
+      this.portfolios = JSON.parse(localStorage.getItem(this.PORTFOLIOS_KEY)) || [];
+      this.links = JSON.parse(localStorage.getItem(this.LINKS_KEY)) || [];
+    } catch (e) {
+      this.portfolios = [];
+      this.links = [];
+    }
+  }
+
+  save() {
+    localStorage.setItem(this.PORTFOLIOS_KEY, JSON.stringify(this.portfolios));
+    localStorage.setItem(this.LINKS_KEY, JSON.stringify(this.links));
+  }
+
+  /* ---- Portfolio CRUD ---- */
+  addPortfolio(name) {
+    const p = { id: Date.now().toString(), name: name.trim(), createdAt: new Date().toISOString() };
+    this.portfolios.push(p);
+    this.save();
+    return p;
+  }
+
+  renamePortfolio(id, newName) {
+    const p = this.portfolios.find(x => x.id === id);
+    if (p) { p.name = newName.trim(); this.save(); }
+  }
+
+  deletePortfolio(id) {
+    this.portfolios = this.portfolios.filter(x => x.id !== id);
+    this.links = this.links.filter(x => x.portfolioId !== id);
+    this.save();
+  }
+
+  getPortfolios() { return [...this.portfolios]; }
+
+  getPortfolio(id) { return this.portfolios.find(x => x.id === id); }
+
+  /* ---- Link CRUD ---- */
+  addLink(portfolioId, title, url) {
+    const l = { id: Date.now().toString(), portfolioId, title: title.trim(), url: url.trim(), createdAt: new Date().toISOString() };
+    this.links.push(l);
+    this.save();
+    return l;
+  }
+
+  renameLink(id, newTitle) {
+    const l = this.links.find(x => x.id === id);
+    if (l) { l.title = newTitle.trim(); this.save(); }
+  }
+
+  updateLinkUrl(id, newUrl) {
+    const l = this.links.find(x => x.id === id);
+    if (l) { l.url = newUrl.trim(); this.save(); }
+  }
+
+  deleteLink(id) {
+    this.links = this.links.filter(x => x.id !== id);
+    this.save();
+  }
+
+  getLinksForPortfolio(portfolioId) {
+    return this.links.filter(x => x.portfolioId === portfolioId);
+  }
+
+  getLinkCount(portfolioId) {
+    return this.links.filter(x => x.portfolioId === portfolioId).length;
+  }
+
+  clearAll() {
+    this.portfolios = [];
+    this.links = [];
+    this.save();
+  }
+}
+
+/* ================================================================
+   App - main application controller
+   ================================================================ */
+class App {
+  constructor() {
+    this.data = new DataManager();
+    this.currentView = 'portfolios';
+    this.currentPortfolioId = null;
+    this.viewHistory = [];
+    this.toastTimer = null;
+
+    this.$ = (sel) => document.querySelector(sel);
+    this.$$ = (sel) => document.querySelectorAll(sel);
+
+    this.init();
+  }
+
+  init() {
+    this.bindEvents();
+    this.renderPortfolios();
+  }
+
+  /* ---- Event Binding ---- */
+  bindEvents() {
+    this.$('#btn-back').addEventListener('click', () => this.goBack());
+    this.$('#btn-menu').addEventListener('click', () => this.showMainMenu());
+    this.$('#btn-bottom-action').addEventListener('click', () => this.onBottomAction());
+    this.$('#btn-about').addEventListener('click', () => this.navigateTo('about'));
+    this.$('#btn-clear-all').addEventListener('click', () => this.confirmClearAll());
+    this.$('#overlay').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) this.closeOverlay();
+    });
+    this.$('#action-sheet-cancel').addEventListener('click', () => this.closeOverlay());
+
+    // Keyboard: Escape to close overlay or go back
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (this.$('#overlay').classList.contains('visible')) {
+          this.closeOverlay();
+        } else if (this.currentView !== 'portfolios') {
+          this.goBack();
+        }
+      }
+    });
+  }
+
+  /* ---- Navigation ---- */
+  navigateTo(view, options = {}) {
+    if (this.currentView !== view) {
+      this.viewHistory.push(this.currentView);
+    }
+    this.currentView = view;
+    this.$$('.view').forEach(v => v.classList.remove('active'));
+    this.$(`#view-${view}`).classList.add('active');
+    this.updateHeader(view, options);
+    this.updateBottomBar(view);
+
+    // Scroll to top
+    this.$('#main-content').scrollTop = 0;
+
+    // Focus management for accessibility
+    const section = this.$(`#view-${view}`);
+    section.setAttribute('tabindex', '-1');
+    section.focus({ preventScroll: true });
+  }
+
+  goBack() {
+    const prev = this.viewHistory.pop();
+    if (prev) {
+      this.currentView = prev;
+      this.$$('.view').forEach(v => v.classList.remove('active'));
+      this.$(`#view-${prev}`).classList.add('active');
+      this.updateHeader(prev);
+      this.updateBottomBar(prev);
+
+      if (prev === 'portfolios') {
+        this.currentPortfolioId = null;
+        this.renderPortfolios();
+      }
+
+      this.$('#main-content').scrollTop = 0;
+    }
+  }
+
+  updateHeader(view, options = {}) {
+    const btnBack = this.$('#btn-back');
+    const title = this.$('#header-title');
+    const btnMenu = this.$('#btn-menu');
+
+    switch (view) {
+      case 'portfolios':
+        btnBack.hidden = true;
+        title.textContent = 'حافظة الروابط';
+        btnMenu.hidden = false;
+        break;
+      case 'links':
+        btnBack.hidden = false;
+        const p = this.data.getPortfolio(this.currentPortfolioId);
+        title.textContent = p ? p.name : 'الروابط';
+        btnMenu.hidden = true;
+        break;
+      case 'settings':
+        btnBack.hidden = false;
+        title.textContent = 'المزيد والإعدادات';
+        btnMenu.hidden = true;
+        break;
+      case 'about':
+        btnBack.hidden = false;
+        title.textContent = 'حول التطبيق';
+        btnMenu.hidden = true;
+        break;
+    }
+  }
+
+  updateBottomBar(view) {
+    const bar = this.$('#bottom-bar');
+    const btn = this.$('#btn-bottom-action');
+
+    switch (view) {
+      case 'portfolios':
+        bar.hidden = false;
+        btn.textContent = 'إضافة حافظة جديدة';
+        break;
+      case 'links':
+        bar.hidden = false;
+        btn.textContent = 'إضافة رابط جديد';
+        break;
+      default:
+        bar.hidden = true;
+    }
+  }
+
+  onBottomAction() {
+    if (this.currentView === 'portfolios') {
+      this.showAddPortfolioDialog();
+    } else if (this.currentView === 'links') {
+      this.showAddLinkDialog();
+    }
+  }
+
+  /* ---- Rendering: Portfolios ---- */
+  renderPortfolios() {
+    const container = this.$('#portfolios-container');
+    const portfolios = this.data.getPortfolios();
+
+    if (portfolios.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon" aria-hidden="true">📂</div>
+          <p class="empty-state-text">لا توجد حافظات بعد.<br>اضغط الزر أدناه لإضافة حافظة جديدة.</p>
+        </div>`;
+      return;
+    }
+
+    const html = `<ul class="card-list" role="list">${portfolios.map(p => {
+      const count = this.data.getLinkCount(p.id);
+      return `
+        <li class="card" role="listitem" data-id="${p.id}" tabindex="0"
+            aria-label="${p.name}، ${count} ${count === 1 ? 'رابط' : 'روابط'}. اضغط للفتح">
+          <div class="card-title">
+            ${this.escHtml(p.name)}
+            <div class="card-badge">${count} ${count === 1 ? 'رابط' : 'روابط'}</div>
+          </div>
+          <button class="card-actions-btn" data-action="portfolio-actions" data-id="${p.id}"
+                  aria-label="إجراءات ${p.name}">إجراءات</button>
+        </li>`;
+    }).join('')}</ul>`;
+
+    container.innerHTML = html;
+
+    // Bind card clicks (open portfolio)
+    container.querySelectorAll('.card').forEach(card => {
+      const handler = (e) => {
+        if (e.target.closest('.card-actions-btn')) return;
+        if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
+        if (e.type === 'keydown') e.preventDefault();
+        this.openPortfolio(card.dataset.id);
+      };
+      card.addEventListener('click', handler);
+      card.addEventListener('keydown', handler);
+    });
+
+    // Bind actions buttons
+    container.querySelectorAll('[data-action="portfolio-actions"]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.showPortfolioActions(btn.dataset.id);
+      });
+    });
+  }
+
+  openPortfolio(id) {
+    this.currentPortfolioId = id;
+    this.renderLinks();
+    this.navigateTo('links');
+  }
+
+  /* ---- Rendering: Links ---- */
+  renderLinks() {
+    const container = this.$('#links-container');
+    const links = this.data.getLinksForPortfolio(this.currentPortfolioId);
+
+    if (links.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon" aria-hidden="true">🔗</div>
+          <p class="empty-state-text">لا توجد روابط في هذه الحافظة.<br>اضغط الزر أدناه لإضافة رابط جديد.</p>
+        </div>`;
+      return;
+    }
+
+    const html = `<ul class="card-list" role="list">${links.map(l => `
+      <li class="card" role="listitem" data-id="${l.id}" tabindex="0"
+          aria-label="${l.title}. اضغط لفتح الرابط">
+        <div class="card-title">
+          ${this.escHtml(l.title)}
+          <div class="card-subtitle">${this.escHtml(l.url)}</div>
+        </div>
+        <button class="card-actions-btn" data-action="link-actions" data-id="${l.id}"
+                aria-label="إجراءات ${l.title}">إجراءات</button>
+      </li>`).join('')}</ul>`;
+
+    container.innerHTML = html;
+
+    // Bind card clicks (open link)
+    container.querySelectorAll('.card').forEach(card => {
+      const handler = (e) => {
+        if (e.target.closest('.card-actions-btn')) return;
+        if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
+        if (e.type === 'keydown') e.preventDefault();
+        const link = this.data.links.find(x => x.id === card.dataset.id);
+        if (link) this.openLink(link.url);
+      };
+      card.addEventListener('click', handler);
+      card.addEventListener('keydown', handler);
+    });
+
+    // Bind actions buttons
+    container.querySelectorAll('[data-action="link-actions"]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.showLinkActions(btn.dataset.id);
+      });
+    });
+  }
+
+  openLink(url) {
+    try {
+      let finalUrl = url;
+      if (!/^https?:\/\//i.test(finalUrl)) {
+        finalUrl = 'https://' + finalUrl;
+      }
+      window.open(finalUrl, '_blank', 'noopener,noreferrer');
+    } catch (e) {
+      this.showToast('تعذر فتح الرابط');
+    }
+  }
+
+  /* ---- Action Sheets ---- */
+  showMainMenu() {
+    this.viewHistory.push(this.currentView);
+    this.navigateTo('settings');
+  }
+
+  showPortfolioActions(id) {
+    const p = this.data.getPortfolio(id);
+    if (!p) return;
+
+    this.showActionSheet(`إجراءات: ${p.name}`, [
+      { label: 'تعديل اسم الحافظة', action: () => this.showRenamePortfolioDialog(id) },
+      { label: 'مشاركة كافة روابط الحافظة', action: () => this.sharePortfolio(id) },
+      { divider: true },
+      { label: 'حذف الحافظة', action: () => this.confirmDeletePortfolio(id), danger: true },
+    ]);
+  }
+
+  showLinkActions(id) {
+    const l = this.data.links.find(x => x.id === id);
+    if (!l) return;
+
+    this.showActionSheet(`إجراءات: ${l.title}`, [
+      { label: 'نسخ الرابط', action: () => this.copyLink(l.url) },
+      { label: 'مشاركة الرابط', action: () => this.shareLink(l) },
+      { divider: true },
+      { label: 'تعديل العنوان', action: () => this.showEditLinkTitleDialog(id) },
+      { label: 'تعديل الرابط نفسه', action: () => this.showEditLinkUrlDialog(id) },
+      { divider: true },
+      { label: 'حذف الرابط', action: () => this.confirmDeleteLink(id), danger: true },
+    ]);
+  }
+
+  /* ---- Dialogs ---- */
+  showAddPortfolioDialog() {
+    this.showInputDialog({
+      title: 'إضافة حافظة جديدة',
+      inputs: [
+        { id: 'portfolio-name', label: 'اسم الحافظة الجديدة', placeholder: 'مثال: مواقع تعليمية', type: 'text' }
+      ],
+      confirmText: 'حفظ',
+      onConfirm: (values) => {
+        const name = values['portfolio-name'];
+        if (!name || !name.trim()) return;
+        this.data.addPortfolio(name);
+        this.renderPortfolios();
+        this.showToast('تم إنشاء الحافظة');
+        this.announce('تم إنشاء الحافظة ' + name);
+      }
+    });
+  }
+
+  showRenamePortfolioDialog(id) {
+    const p = this.data.getPortfolio(id);
+    if (!p) return;
+
+    this.showInputDialog({
+      title: 'تعديل اسم الحافظة',
+      inputs: [
+        { id: 'portfolio-name', label: 'أدخل الاسم الجديد للحافظة:', placeholder: '', type: 'text', value: p.name }
+      ],
+      confirmText: 'حفظ',
+      onConfirm: (values) => {
+        const name = values['portfolio-name'];
+        if (!name || !name.trim()) return;
+        this.data.renamePortfolio(id, name);
+        this.renderPortfolios();
+        this.showToast('تم تعديل اسم الحافظة');
+      }
+    });
+  }
+
+  showAddLinkDialog() {
+    this.showInputDialog({
+      title: 'إضافة رابط جديد',
+      inputs: [
+        { id: 'link-title', label: 'عنوان الرابط (اكتب اسماً واضحاً للرابط):', placeholder: 'مثال: موقع جوجل', type: 'text' },
+        { id: 'link-url', label: 'الرابط الإلكتروني (قم بلصق الرابط هنا):', placeholder: 'https://', type: 'url' }
+      ],
+      confirmText: 'حفظ',
+      onConfirm: (values) => {
+        const title = values['link-title'];
+        const url = values['link-url'];
+        if (!title || !title.trim() || !url || !url.trim()) return;
+        this.data.addLink(this.currentPortfolioId, title, url);
+        this.renderLinks();
+        this.showToast('تم حفظ الرابط');
+        this.announce('تم حفظ الرابط ' + title);
+      }
+    });
+  }
+
+  showEditLinkTitleDialog(id) {
+    const l = this.data.links.find(x => x.id === id);
+    if (!l) return;
+
+    this.showInputDialog({
+      title: 'تعديل عنوان الرابط',
+      inputs: [
+        { id: 'link-title', label: 'أدخل العنوان الجديد للرابط:', placeholder: '', type: 'text', value: l.title }
+      ],
+      confirmText: 'حفظ',
+      onConfirm: (values) => {
+        const title = values['link-title'];
+        if (!title || !title.trim()) return;
+        this.data.renameLink(id, title);
+        this.renderLinks();
+        this.showToast('تم تعديل عنوان الرابط');
+      }
+    });
+  }
+
+  showEditLinkUrlDialog(id) {
+    const l = this.data.links.find(x => x.id === id);
+    if (!l) return;
+
+    this.showInputDialog({
+      title: 'تعديل الرابط',
+      inputs: [
+        { id: 'link-url', label: 'أدخل الرابط الإلكتروني الجديد:', placeholder: 'https://', type: 'url', value: l.url }
+      ],
+      confirmText: 'حفظ',
+      onConfirm: (values) => {
+        const url = values['link-url'];
+        if (!url || !url.trim()) return;
+        this.data.updateLinkUrl(id, url);
+        this.renderLinks();
+        this.showToast('تم تعديل الرابط');
+      }
+    });
+  }
+
+  confirmDeletePortfolio(id) {
+    const p = this.data.getPortfolio(id);
+    if (!p) return;
+
+    this.showConfirmDialog({
+      title: 'حذف الحافظة',
+      message: 'هل تريد حذف الحافظة وكل روابطها؟',
+      confirmText: 'نعم',
+      danger: true,
+      onConfirm: () => {
+        this.data.deletePortfolio(id);
+        this.renderPortfolios();
+        this.showToast('تم حذف الحافظة');
+        this.announce('تم حذف الحافظة ' + p.name);
+      }
+    });
+  }
+
+  confirmDeleteLink(id) {
+    const l = this.data.links.find(x => x.id === id);
+    if (!l) return;
+
+    this.showConfirmDialog({
+      title: 'حذف الرابط',
+      message: 'هل تريد حذف هذا الرابط؟',
+      confirmText: 'نعم',
+      danger: true,
+      onConfirm: () => {
+        this.data.deleteLink(id);
+        this.renderLinks();
+        this.showToast('تم حذف الرابط');
+        this.announce('تم حذف الرابط');
+      }
+    });
+  }
+
+  confirmClearAll() {
+    this.showConfirmDialog({
+      title: 'مسح كل البيانات',
+      message: 'هل تريد مسح جميع البيانات بشكل دائم؟',
+      confirmText: 'نعم',
+      danger: true,
+      onConfirm: () => {
+        this.data.clearAll();
+        this.currentPortfolioId = null;
+        this.viewHistory = [];
+        this.navigateTo('portfolios');
+        this.renderPortfolios();
+        this.showToast('تم مسح كافة البيانات');
+        this.announce('تم مسح جميع البيانات');
+      }
+    });
+  }
+
+  /* ---- Sharing / Copying ---- */
+  async copyLink(url) {
+    try {
+      await navigator.clipboard.writeText(url);
+      this.showToast('تم نسخ الرابط');
+      this.announce('تم نسخ الرابط');
+    } catch (e) {
+      // Fallback for older browsers
+      const ta = document.createElement('textarea');
+      ta.value = url;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); this.showToast('تم نسخ الرابط'); }
+      catch (e2) { this.showToast('تعذر نسخ الرابط'); }
+      document.body.removeChild(ta);
+    }
+  }
+
+  async shareLink(link) {
+    const text = `${link.title}\n${link.url}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: link.title, text: text, url: link.url });
+      } catch (e) {
+        if (e.name !== 'AbortError') this.showToast('تعذر فتح المشاركة');
+      }
+    } else {
+      await this.copyLink(link.url);
+    }
+  }
+
+  async sharePortfolio(id) {
+    const p = this.data.getPortfolio(id);
+    if (!p) return;
+    const links = this.data.getLinksForPortfolio(id);
+    if (links.length === 0) {
+      this.showToast('لا توجد روابط في هذه الحافظة');
+      return;
+    }
+
+    const text = `${p.name}\n${'─'.repeat(20)}\n` +
+      links.map((l, i) => `${i + 1}. ${l.title}\n${l.url}`).join('\n\n');
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: p.name, text: text });
+      } catch (e) {
+        if (e.name !== 'AbortError') this.showToast('تعذر فتح المشاركة');
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(text);
+        this.showToast('تم نسخ جميع الروابط');
+      } catch (e) {
+        this.showToast('تعذر فتح المشاركة');
+      }
+    }
+  }
+
+  /* ---- Overlay System ---- */
+  showOverlay() {
+    const overlay = this.$('#overlay');
+    overlay.classList.add('visible');
+    // Prevent body scroll
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeOverlay() {
+    const overlay = this.$('#overlay');
+    overlay.classList.remove('visible');
+    document.body.style.overflow = '';
+    // Hide both dialog and action sheet
+    this.$('#dialog').hidden = true;
+    this.$('#action-sheet').hidden = true;
+    // Restore focus
+    if (this._focusReturn) {
+      this._focusReturn.focus();
+      this._focusReturn = null;
+    }
+  }
+
+  showActionSheet(title, items) {
+    this._focusReturn = document.activeElement;
+    const sheet = this.$('#action-sheet');
+    const titleEl = this.$('#action-sheet-title');
+    const itemsEl = this.$('#action-sheet-items');
+
+    this.$('#dialog').hidden = true;
+    sheet.hidden = false;
+
+    if (title) {
+      titleEl.textContent = title;
+      titleEl.hidden = false;
+    } else {
+      titleEl.hidden = true;
+    }
+
+    itemsEl.innerHTML = items.map(item => {
+      if (item.divider) return '<div class="action-sheet-divider"></div>';
+      return `<button class="action-sheet-item${item.danger ? ' danger' : ''}">${this.escHtml(item.label)}</button>`;
+    }).join('');
+
+    // Bind actions
+    let btnIndex = 0;
+    itemsEl.querySelectorAll('.action-sheet-item').forEach(btn => {
+      while (items[btnIndex] && items[btnIndex].divider) btnIndex++;
+      const item = items[btnIndex];
+      if (item) {
+        btn.addEventListener('click', () => {
+          this.closeOverlay();
+          setTimeout(() => item.action(), 150);
+        });
+      }
+      btnIndex++;
+    });
+
+    this.showOverlay();
+
+    // Focus first item
+    const firstBtn = itemsEl.querySelector('.action-sheet-item');
+    if (firstBtn) setTimeout(() => firstBtn.focus(), 300);
+  }
+
+  showInputDialog({ title, inputs, confirmText, onConfirm }) {
+    this._focusReturn = document.activeElement;
+    const dialog = this.$('#dialog');
+    const sheet = this.$('#action-sheet');
+
+    sheet.hidden = true;
+    dialog.hidden = false;
+    this.$('#dialog-message').hidden = true;
+
+    this.$('#dialog-title').textContent = title;
+
+    this.$('#dialog-inputs').innerHTML = inputs.map(inp => `
+      <div class="dialog-input-group">
+        <label class="dialog-label" for="dlg-${inp.id}">${inp.label}</label>
+        <input class="dialog-input" type="${inp.type || 'text'}" id="dlg-${inp.id}"
+               placeholder="${inp.placeholder || ''}" value="${this.escHtml(inp.value || '')}"
+               autocomplete="off" autocorrect="off">
+      </div>`).join('');
+
+    this.$('#dialog-buttons').innerHTML = `
+      <button class="dialog-btn dialog-btn-confirm" id="dlg-confirm">${confirmText}</button>
+      <button class="dialog-btn dialog-btn-cancel" id="dlg-cancel">إلغاء</button>`;
+
+    this.$('#dlg-confirm').addEventListener('click', () => {
+      const values = {};
+      inputs.forEach(inp => {
+        values[inp.id] = this.$(`#dlg-${inp.id}`).value;
+      });
+      this.closeOverlay();
+      onConfirm(values);
+    });
+    this.$('#dlg-cancel').addEventListener('click', () => this.closeOverlay());
+
+    // Enter key submits
+    dialog.querySelectorAll('.dialog-input').forEach(inp => {
+      inp.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          this.$('#dlg-confirm').click();
+        }
+      });
+    });
+
+    this.showOverlay();
+
+    // Focus first input
+    const firstInput = dialog.querySelector('.dialog-input');
+    if (firstInput) setTimeout(() => firstInput.focus(), 300);
+  }
+
+  showConfirmDialog({ title, message, confirmText, danger, onConfirm }) {
+    this._focusReturn = document.activeElement;
+    const dialog = this.$('#dialog');
+    const sheet = this.$('#action-sheet');
+
+    sheet.hidden = true;
+    dialog.hidden = false;
+
+    this.$('#dialog-title').textContent = title;
+    this.$('#dialog-message').textContent = message;
+    this.$('#dialog-message').hidden = false;
+    this.$('#dialog-inputs').innerHTML = '';
+
+    this.$('#dialog-buttons').innerHTML = `
+      <button class="dialog-btn ${danger ? 'dialog-btn-danger' : 'dialog-btn-confirm'}" id="dlg-confirm">${confirmText}</button>
+      <button class="dialog-btn dialog-btn-cancel" id="dlg-cancel">إلغاء</button>`;
+
+    this.$('#dlg-confirm').addEventListener('click', () => {
+      this.closeOverlay();
+      onConfirm();
+    });
+    this.$('#dlg-cancel').addEventListener('click', () => this.closeOverlay());
+
+    this.showOverlay();
+    setTimeout(() => this.$('#dlg-confirm').focus(), 300);
+  }
+
+  /* ---- Toast ---- */
+  showToast(message) {
+    const toast = this.$('#toast');
+    toast.textContent = message;
+    toast.classList.add('visible');
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => toast.classList.remove('visible'), 2500);
+  }
+
+  /* ---- Screen Reader Announcement ---- */
+  announce(message) {
+    const el = this.$('#sr-announce');
+    el.textContent = '';
+    setTimeout(() => { el.textContent = message; }, 100);
+  }
+
+  /* ---- Utility ---- */
+  escHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+  }
+}
+
+/* ================================================================
+   Initialize App
+   ================================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  window.app = new App();
+});
+
+/* ================================================================
+   PWA Service Worker Registration
+   ================================================================ */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {
+      // Service worker registration failed (likely file:// protocol)
+    });
+  });
+}
+</script>
+</body>
+</html>
